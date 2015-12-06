@@ -7,6 +7,8 @@ module.exports = function(credentials) {
     awsId: credentials.accessKeyId,
     awsSecret: credentials.secretAccessKey,
     assocId: credentials.associateId,
+    endPoint: credentials.endPoint || 'ecs.amazonaws.com',
+    baseUri: credentials.baseUri || '/onca/xml',
     xml2jsOptions: {
       explicitArray: false,
       ignoreAttrs: true
@@ -40,11 +42,18 @@ module.exports = function(credentials) {
   },
 
   this.createCart = function(opts, callback) {
-    this.amazonAPI.execute('CartCreate', {
+    var args = {
       'AssociateTag': credentials.associateId,
-      'Item.1.ASIN': opts.ASIN,
       'Item.1.Quantity': opts.qty
-    }, function(err, res) {
+    };
+
+    if (opts.OfferListingId)
+      args['Item.1.OfferListingId'] = opts.OfferListingId;
+
+    if (opts.ASIN)
+      args['Item.1.ASIN'] = opts.ASIN;
+
+    this.amazonAPI.execute('CartCreate', args, function(err, res) {
       callback(err, res);
     });
   },
